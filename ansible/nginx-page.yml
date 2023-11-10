@@ -1,0 +1,21 @@
+- name: Change default nginx page
+  hosts: backend
+  become: yes
+  tasks:
+    - name: remove default page
+      file:
+        path: /var/www/html/index.nginx-debian.html
+        state: absent
+    
+    - name: add new page nginx
+      copy:
+        content: "served from: {{ inventory_hostname }}"
+        dest: /var/www/html/index.html
+      notify: reload-nginx
+    
+  handlers:
+    - name: reload-nginx
+      service:
+        name: nginx
+        state: reloaded
+      

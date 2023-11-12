@@ -1,5 +1,5 @@
-# Technical Test SmartM2M
-Dear SmartM2M Team, thanks for your opportunity and give me time to finish the Ansible & Kubernetes Challenge Deployment. In this page, i will to describe how this case can build and work appropriate with the requirement in guideline. Lest begind
+# Technical Test
+Dear Technical Team, thanks for your opportunity and give me time to finish the Ansible & Kubernetes Challenge Deployment. In this page, i will to describe how iam try to work the challange appropriate with the requirement in guideline. Lets begin
 
 
 ## Table of Content
@@ -9,34 +9,34 @@ Dear SmartM2M Team, thanks for your opportunity and give me time to finish the A
 
 ## Ansible
 ### Case Study
-Create an inventory file in Ansible, group your inventory to follow these criteria:
-node1 should be the member of "loadbalancer" group.
-node2 and node3 should be the member of "backend" group.
 
-After creating the inventory, create a playbook to install nginx on all of the servers.
-Then, create another playbook to change the default nginx index page with a html file contains "served from: <hostname>". perform this task on the backend group expected result: when we hit http://node2, we should get "served from: node2"
-
-Lastly, create playbook to setup nginx in the loadbalancer group as follows:
-- Make it load balance between nodes in the backend group
-- Use "least connection" load balancing method
+1. Create inventory file with group loadbalancer and backend using 3 node.
+2. Create playbook to install nginx on all server
+3. Create playbook to change nginx index to backend host with contains "served from: hostname"
+4. Create playbook to setup nginx in the loadbalancer group with methode "least connection" between nodes in the backend group
 
 ### Solution
-First, for inventory iam create using *.ini extention and private key methode so as we did'n need add hosts password for execute the program. All of the Ansible file can you find [(here)](/ansible/)
+1. First, for inventory iam create using *.ini extention and private key methode so as we did'n need add hosts password for execute the program
 
-1. Install Nginx, for run this program you can execute that command.
+2. Install Nginx, for run this program you can execute that command.
     ```
     ansible-playbook -i inventory.ini nginx-install.yml
     ```
 
-2. Change default nginx page for backend.
+3. Change default nginx page for backend.
     ```
     ansible-playbook -i inventory.ini nginx-page.yml
     ```
 
-3. Setup nginx load balancer.
+4. Setup nginx load balancer.
     ```
     ansible-playbook -i inventory.ini nginx-page.yml
     ```
+5. for alternative i can install all part from 1-4 with one file like that.
+    ```
+    ansible-playbook -i inventory.ini nginx-configlb.yml
+    ```
+
 
 ### Result
 I'am trying to access public address of node1 (loadbalancer) with some incognito browser and loadbalancer can direct to node2 and node3 (backend) webserver.
@@ -47,22 +47,14 @@ I'am trying to access public address of node1 (loadbalancer) with some incognito
 
 ## Kubernetes
 ### Case Study
-Create a deployment as follows:
-- Name: nginx-app
-- Using container nginx with version 1.11.10-alpine
-- The deployment should contain 3 replicas
 
-Next, deploy the application with new version 1.11.13-alpine, by performing a rolling update.
-
-Finally, rollback that update to the previous version 1.11.10-alpine.
-
-Set a node named k8s-node-1 as unavailable and reschedule all the pods running on it.
-
-Create a Persistent Volume with name app-data, of capacity 2Gi and access mode ReadWriteMany. The type of volume is hostPath and its location is /srv/app-data.
-Create a Persistent Volume Claim that requests the Persistent Volume you had created above. The claim should request 2Gi. Ensure that the Persistent Volume Claim has the same storageClassName as the Persistent Volume you had previously created.
-
-You have been asked to set up a Kubernetes cluster, one master and one worker node.
-You have done the initialization of the master, what is the next steps to make the worker node join the cluster?
+1. Make the worker node join the cluster
+2. Create a deployment with Name: nginx-app using container nginx:1.11.10-alpine and 3 replicas
+3. Deploy the application with new version 1.11.13-alpine, by performing a rolling update.
+4. Rollback that update to the previous version 1.11.10-alpine.
+5. Set a node named k8s-node-1 as unavailable and reschedule all the pods running on it.
+6. Create a Persistent Volume with name app-data, of capacity 2Gi and access mode ReadWriteMany. The type of volume is hostPath and its location is /srv/app-data.
+7. Create a Persistent Volume Claim that requests the Persistent Volume you had created above. The claim should request 2Gi. Ensure that the Persistent Volume Claim has the same storageClassName as the Persistent Volume you had previously created.
 
 ### Solution
 
@@ -74,10 +66,10 @@ You have done the initialization of the master, what is the next steps to make t
     The result show command with credential for worker node, copy this and run in worker node. After that, check the node is join or not in master note.
 
     <p align="center">
-    <img width="500" src="result/kubernetes/3. get-node.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/3. get-node.png" alt="Load Balancer">
     <p>
     
-2. Create Deployment nginx-app, for run this program you can execute that command.
+2. Create Deployment nginx-app, for run this program iam execute that command.
     ```
     kubectl apply -f nginx-install.yml
     ```
@@ -85,7 +77,7 @@ You have done the initialization of the master, what is the next steps to make t
     After that, for make sure the apps its already running, iam using this command with result.
 
     <p align="center">
-    <img width="500" src="result/kubernetes/4. get-pods.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/4. get-pods.png" alt="Load Balancer">
     <p>
 
 3. Deploy the application with new version 1.11.13-alpine, for this case iam user the same yml like nginx-install but with change the image version.
@@ -101,7 +93,7 @@ You have done the initialization of the master, what is the next steps to make t
     kubectl rollout history deployment nginx-app
     ```
     <p align="center">
-    <img width="500" src="result/kubernetes/5. history-rollout.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/5. history-rollout.png" alt="Load Balancer">
     <p>
 
     Or for verify the version is change, iam can use discribe command
@@ -110,41 +102,52 @@ You have done the initialization of the master, what is the next steps to make t
     ```
 
     <p align="center">
-    <img width="500" src="result/kubernetes/6. descib-pods.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/6. descib-pods.png" alt="Load Balancer">
     <p>
 
 4. Rollback that update to the previous version 1.11.10-alpine.
     ```
     kubectl rollout undo deployment nginx-app
     ```
+    for see the change off that, we can use rollout command like before, and i can see the 3rd revision is the undo update.
 
     <p align="center">
-    <img width="500" src="result/kubernetes/7. undo-rollout.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/7. undo-rollout.png" alt="Load Balancer">
     <p>
 
 5. Set a node named k8s-node-1 as unavailable and reschedule all the pods running on it.
     ```
     kubectl drain k8s-node-1 --ignore-daemonsets
     ```
+    Result after runing the command, node can have status **SchedulingDisabled** like this.
 
     <p align="center">
-    <img width="500" src="result/kubernetes/8. set-unavailable.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/8. set-unavailable.png" alt="Load Balancer">
     <p>
 
 6. Create a Persistent Volume with name app-data.
     ```
     kubectl apply -f pvolume.yml
     ```
+    for see the volume created, iam using the command.
 
     <p align="center">
-    <img width="500" src="result/kubernetes/9. peersistance-volume.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/9. peersistance-volume.png" alt="Load Balancer">
     <p>    
 
 7. Create a Persistent Volume Claim that requests the Persistent Volume you had created above.
     ```
     kubectl apply -f pvolumeclaim.yml
     ```
+    for see the result, iam using same command like before.
 
     <p align="center">
-    <img width="500" src="result/kubernetes/10. volume-claim.png" alt="Load Balancer">
+    <img width="700" src="result/kubernetes/10. volume-claim.png" alt="Load Balancer">
     <p>
+
+
+## Conclusion
+This project i created in GCP VM Instance, i know maybe my solution didn't perpect but i hope can meet goal expectations for the challange. Thanks Before.
+
+Regards,
+Tresna Widiyaman

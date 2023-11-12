@@ -1,0 +1,56 @@
+- name: Installing nginx
+  hosts: all
+  become: yes
+  tasks:
+    - name: update package
+      apt:
+        update_cache: yes
+    
+    - name: install package
+      apt:
+        name: nginx
+        state: present
+
+
+- name: Change default nginx page
+  hosts: backend
+  become: yes
+  tasks:
+    - name: remove default page
+      file:
+        path: /var/www/html/index.nginx-debian.html
+        state: absent
+    
+    - name: add new page nginx
+      copy:
+        content: "served from: {{ inventory_hostname }}"
+        dest: /var/www/html/index.html
+      notify: reload-nginx
+    
+  handlers:
+    - name: reload-nginx
+      service:
+        name: nginx
+        state: reloaded
+
+
+- name: setup loadbalance
+  hosts: loadbalancer
+  become: yes
+  tasks:
+    - name: remove old config
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      
+    - name: import config
+      copy:
+        src: ./loadbalance.conf.j2
+        dest: /etc/nginx/conf.d/loadbalance.conf
+      notify: restart-nginx
+    
+  handlers:
+    - name: restart-nginx
+      service:
+        name: nginx
+        state: restarted
